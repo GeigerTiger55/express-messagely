@@ -133,9 +133,8 @@ class User {
           t.last_name AS to_last_name,
           t.phone AS to_phone
         FROM messages AS m
-            JOIN users AS f ON m.from_username = f.username
             JOIN users AS t ON m.to_username = t.username
-        WHERE f.username = $1
+        WHERE m.from_user = $1
         `,
       [username]
     );
@@ -158,7 +157,7 @@ class User {
         read_at: m.read_at
 
       }
-    })
+    });
 
     return messages;
   }
@@ -184,15 +183,10 @@ class User {
           f.phone AS from_phone
         FROM messages AS m
             JOIN users AS f ON m.from_username = f.username
-            JOIN users AS t ON m.to_username = t.username
-        WHERE t.username = $1
+        WHERE m.to_user = $1
         `,
       [username]
     );
-
-    if (result.rows.length === 0) {
-      throw new NotFoundError('Could not find messages for user');
-    }
 
     const messages = result.rows.map(m => {
       return {
@@ -206,9 +200,8 @@ class User {
         body: m.body,
         sent_at: m.sent_at,
         read_at: m.read_at
-
       }
-    })
+    });
 
     return messages;
   }

@@ -3,7 +3,13 @@
 const Router = require("express").Router;
 const router = new Router();
 
-/** POST /login: {username, password} => {token} */
+/** POST /login: {username, password} => {token} 
+ * 
+ * Get PW using username
+ * verify password with bcrypt
+ * store in res.locals._token
+*/
+
 
 
 /** POST /register: registers, logs in, and returns token.
