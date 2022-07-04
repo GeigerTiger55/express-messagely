@@ -77,7 +77,8 @@ class User {
   static async all() {
     const result = await db.query(
       `SELECT username, first_name, last_name
-        FROM users`
+        FROM users
+        ORDER BY username`
     );
 
     return result.rows;
@@ -134,8 +135,8 @@ class User {
           t.phone AS to_phone
         FROM messages AS m
             JOIN users AS t ON m.to_username = t.username
-        WHERE m.from_user = $1
-        `,
+        WHERE m.from_username = $1
+        ORDER BY m.sent_at DESC`,
       [username]
     );
 
@@ -179,8 +180,8 @@ class User {
           f.phone AS from_phone
         FROM messages AS m
             JOIN users AS f ON m.from_username = f.username
-        WHERE m.to_user = $1
-        `,
+        WHERE m.to_username = $1
+        ORDER BY m.sent_at DESC`,
       [username]
     );
 
