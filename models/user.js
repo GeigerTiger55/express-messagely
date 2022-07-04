@@ -3,6 +3,7 @@
 const { BCRYPT_WORK_FACTOR } = require("../config");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const bcrypt = require("bcrypt");
+const db = require('../db');
 
 /** User of the site. */
 
@@ -20,10 +21,17 @@ class User {
                             password,
                             first_name,
                             last_name,
-                            phone)
+                            phone,
+                            join_at,
+                            last_login_at
+                            )
             VALUES
-              ($1, $2, $3, $4, $5)
-            RETURNING username, password, first_name, last_name, phone`,
+              ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            RETURNING username, 
+                      password, 
+                      first_name, 
+                      last_name, 
+                      phone`,
       [ username, hashedPassword, first_name, last_name, phone ]);
     if(result.rows.length === 0){
       throw new BadRequestError('Could not create user');
@@ -34,12 +42,12 @@ class User {
   /** Authenticate: is username/password valid? Returns boolean. */
 
   static async authenticate(username, password) {
-    const result = await dbquery(
+    const result = await db.query(
       `SELECT password
         FROM users
         WHERE username = $1`,
       [username]);
-    const user = results.rows[0];
+    const user = result.rows[0];
 
     if(user) {
        return await bcrypt.compare(password, user.password) === true;
@@ -67,6 +75,12 @@ class User {
    * [{username, first_name, last_name}, ...] */
 
   static async all() {
+    const result = await db.query(
+      `SELECT username, first_name, last_name
+        FROM users`
+    );
+
+    return result.rows;
   }
 
   /** Get: get user by username
@@ -79,6 +93,24 @@ class User {
    *          last_login_at } */
 
   static async get(username) {
+    const result = await db.query(
+      `SELECT 
+          username, 
+          first_name, 
+          last_name, 
+          phone, 
+          join_at, 
+          last_login_at
+        FROM users
+        WHERE username = $1`,
+        [username]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError('Could not find user');
+    }
+
+    return result.rows[0];
   }
 
   /** Return messages from this user.
@@ -90,6 +122,46 @@ class User {
    */
 
   static async messagesFrom(username) {
+    const result = await db.query(
+      `SELECT 
+          m.id, 
+          m.body, 
+          m.sent_at, 
+          m.read_at,
+          m.to_username,
+          t.first_name AS to_first_name,
+          t.last_name AS to_last_name,
+          t.phone AS to_phone
+        FROM messages AS m
+            JOIN users AS f ON m.from_username = f.username
+            JOIN users AS t ON m.to_username = t.username
+        WHERE f.username = $1
+        `,
+        [username]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError('Could not find messages for user');
+    }
+
+    const messages = result.rows.map(m => {
+      return {
+        id: m.id,
+        to_user: {
+          username: m.to_username,
+          first_name: m.to_first_name,
+          last_name: m.to_last_name,
+          phone: m.to_phone
+        },
+        body: m.body,
+        sent_at: m.sent_at,
+        read_at: m.read_at
+
+      }
+    })
+    console.log(messages);
+    return messages;
+
   }
 
   /** Return messages to this user.
