@@ -15,9 +15,9 @@ class User {
 
   static async register({ username, password, first_name, last_name, phone }) {
     const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
-    
+
     const result = await db.query(
-        `INSERT INTO users (username,
+      `INSERT INTO users (username,
                             password,
                             first_name,
                             last_name,
@@ -32,8 +32,8 @@ class User {
                       first_name, 
                       last_name, 
                       phone`,
-      [ username, hashedPassword, first_name, last_name, phone ]);
-    if(result.rows.length === 0){
+      [username, hashedPassword, first_name, last_name, phone]);
+    if (result.rows.length === 0) {
       throw new BadRequestError('Could not create user');
     }
     return result.rows[0];
@@ -49,8 +49,8 @@ class User {
       [username]);
     const user = result.rows[0];
 
-    if(user) {
-       return await bcrypt.compare(password, user.password) === true;
+    if (user) {
+      return await bcrypt.compare(password, user.password) === true;
     }
 
     return false;
@@ -66,7 +66,7 @@ class User {
         RETURNING username, last_login_at`,
       [username]);
 
-    if(result.rows.length === 0){
+    if (result.rows.length === 0) {
       throw new NotFoundError('Could not find user');
     }
   }
@@ -103,7 +103,7 @@ class User {
           last_login_at
         FROM users
         WHERE username = $1`,
-        [username]
+      [username]
     );
 
     if (result.rows.length === 0) {
@@ -137,7 +137,7 @@ class User {
             JOIN users AS t ON m.to_username = t.username
         WHERE f.username = $1
         `,
-        [username]
+      [username]
     );
 
     if (result.rows.length === 0) {
@@ -159,9 +159,8 @@ class User {
 
       }
     })
-    console.log(messages);
-    return messages;
 
+    return messages;
   }
 
   /** Return messages to this user.
@@ -173,6 +172,45 @@ class User {
    */
 
   static async messagesTo(username) {
+    const result = await db.query(
+      `SELECT 
+          m.id, 
+          m.body, 
+          m.sent_at, 
+          m.read_at,
+          m.from_username,
+          f.first_name AS from_first_name,
+          f.last_name AS from_last_name,
+          f.phone AS from_phone
+        FROM messages AS m
+            JOIN users AS f ON m.from_username = f.username
+            JOIN users AS t ON m.to_username = t.username
+        WHERE t.username = $1
+        `,
+      [username]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError('Could not find messages for user');
+    }
+
+    const messages = result.rows.map(m => {
+      return {
+        id: m.id,
+        from_user: {
+          username: m.from_username,
+          first_name: m.from_first_name,
+          last_name: m.from_last_name,
+          phone: m.from_phone
+        },
+        body: m.body,
+        sent_at: m.sent_at,
+        read_at: m.read_at
+
+      }
+    })
+
+    return messages;
   }
 }
 
