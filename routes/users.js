@@ -43,7 +43,6 @@ router.get('/:username/to', ensureCorrectUser, async function(req, res){
   return res.json({messages});
 });
 
-
 /** GET /:username/from - get messages from user
  *
  * => {messages: [{id,
