@@ -9,13 +9,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
-    "body-parser": "*",
+    "body-parser": "^2.0.0-beta.1",
     "cors": "*",
     "dotenv": "*",
     "express": "^5.0.0-alpha.8",
     "express-cors": "*",
     "jsonwebtoken": "*",
+    "nunjucks": "^3.2.3",
     "pg": "*",
     "supertest": "*"
   },

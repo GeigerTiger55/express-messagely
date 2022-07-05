@@ -4,11 +4,22 @@
 
 
 const express = require("express");
+const axios = require("axios");
+const nunjucks = require("nunjucks");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const { authenticateJWT } = require("./middleware/auth");
 
 const { NotFoundError } = require("./expressError");
 const app = new express();
+
+// Parse body for urlencoded (non-JSON) data
+app.use(bodyParser.urlencoded({ extended: false }));
+
+nunjucks.configure("templates", {
+  autoescape: true,
+  express: app,
+});
 
 // allow both form-encoded and json body parsing
 app.use(express.json());
@@ -29,6 +40,11 @@ const messageRoutes = require("./routes/messages");
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/messages", messageRoutes);
+
+/** Home page route */
+app.get("/", async function(req, res){
+  return res.render('home.html');
+});
 
 
 /** 404 handler: matches unmatched routes; raises NotFoundError. */

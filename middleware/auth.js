@@ -14,7 +14,9 @@ function authenticateJWT(req, res, next) {
   try {
     const tokenFromRequest = req.query._token || req.body._token;
     const payload = jwt.verify(tokenFromRequest, SECRET_KEY);
+    
     res.locals.user = payload;
+    console.log('**res.locals.user', res.locals.user);
     return next();
   } catch (err) {
     // error in this middleware isn't error -- continue on
@@ -40,6 +42,7 @@ function ensureLoggedIn(req, res, next) {
 
 function ensureCorrectUser(req, res, next) {
   try {
+    console.log('*****ensureCorrectUser', res.locals.user);
     if (!res.locals.user ||
         res.locals.user.username !== req.params.username) {
       throw new UnauthorizedError();

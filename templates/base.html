@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Messagely</title>
+
+  <link rel="stylesheet"
+        href="https://unpkg.com/bootstrap@5/dist/css/bootstrap.css">
+  <script src="https://unpkg.com/jquery"></script>
+  <script src="https://unpkg.com/popper"></script>
+  <script src="https://unpkg.com/bootstrap"></script>
+  <script src="../static/app.js"></script>
+
+  <link rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+<nav class="navbar navbar-expand">
+  <div class="container-fluid">
+
+    <div class="navbar-header">
+      <a href="/" class="navbar-brand">
+        <span>Messagely</span>
+      </a>
+    </div>
+
+    <ul class="nav navbar-nav navbar-right">
+
+
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+
+
+
+  {% block content %}
+  {% endblock %}
+
+</div>
+</body>
+</html>
