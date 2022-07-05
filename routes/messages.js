@@ -62,7 +62,7 @@ router.post('/:id/read', ensureLoggedIn, async function (req, res) {
   const messageId = req.params.id;
   const message = await Message.get(messageId);
 
-  //Verify currently-logged-in user is either the to user.
+  //Verify currently-logged-in user is the to user.
   const to_user = message.to_user.username;
   if (res.locals.user.username !== to_user) {
     throw new UnauthorizedError();

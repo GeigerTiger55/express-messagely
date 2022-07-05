@@ -21,11 +21,20 @@ router.get('/', ensureLoggedIn, async function (req, res) {
 /** GET /:username - get detail of user.
  *
  * => {user: {username, first_name, last_name, phone, join_at, last_login_at}}
- *
  **/
 router.get('/:username', ensureCorrectUser, async function (req, res) {
   const user = await User.get(req.params.username);
-  return res.json({ user });
+  const { username, first_name, last_name, phone, join_at, last_login_at } = user;
+  return res.json({
+    user: {
+      username,
+      first_name,
+      last_name,
+      phone,
+      join_at,
+      last_login_at
+    }
+  });
 });
 
 

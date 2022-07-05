@@ -10,19 +10,18 @@ const router = new Router();
 
 /** POST /login: {username, password} => {token} 
  *  If invalid username or password is provided, throws error
- *  with 401 status code.
-*/
+ *  with 401 status code. 
+ */
 router.post('/login', async function (req, res, next) {
-    const username = req.body.username;
-    const password = req.body.password;
+  const {username, password} = req.body;
 
-    if(await User.authenticate(username, password) === true) {
-        const user = { username };
-        const token = jwt.sign(user, SECRET_KEY);
-        return res.send({ token });
-    }
+  if (await User.authenticate(username, password) === true) {
+    const user = { username };
+    const token = jwt.sign(user, SECRET_KEY);
+    return res.send({ token });
+  }
 
-    throw new UnauthorizedError('Invalid username or password.');
+  throw new UnauthorizedError('Invalid username or password.');
 });
 
 
@@ -32,22 +31,18 @@ router.post('/login', async function (req, res, next) {
  * {username, password, first_name, last_name, phone} => {token}.
  */
 router.post('/register', async function (req, res, next) {
-    const username = req.body.username;
-    const password = req.body.password;
-    const first_name = req.body.first_name;
-    const last_name = req.body.last_name;
-    const phone = req.body.phone;
+  const {username, password, first_name, last_name, phone} = req.body;
 
-    const user = await User.register({
-        username, 
-        password, 
-        first_name, 
-        last_name, 
-        phone,
-    });
-    const token = jwt.sign({username:user.username}, SECRET_KEY);
+  const user = await User.register({
+    username,
+    password,
+    first_name,
+    last_name,
+    phone,
+  });
+  const token = jwt.sign({ username: user.username }, SECRET_KEY);
 
-    return res.send({ token });
+  return res.send({ token });
 });
 
 module.exports = router;
